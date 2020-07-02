@@ -124,5 +124,24 @@ namespace RedoUndoLibraryTest
             var expected = "B";
             Assert.AreEqual(expected, actual);
         }
+
+        [Test]
+        public void MaxStep2Do2TimesAndUndo3Times()
+        {
+            var target = new RedoUndoService<string>(2);
+            target.Do("A");
+            target.Do("B");
+            target.Undo();
+            target.Undo();
+            target.Undo();
+
+            var actualDoList = target.DoList;
+            var expectedDoList = new Stack<string>();
+            actualDoList.Should().BeEquivalentTo(expectedDoList);
+
+            var actualUndoList = target.UndoList;
+            var expectedUndoList = new Stack<string>(new []{"B","A"});
+            actualUndoList.Should().BeEquivalentTo(expectedUndoList);
+        }
     }
 }

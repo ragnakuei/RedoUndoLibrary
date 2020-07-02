@@ -26,6 +26,11 @@ namespace RedoUndoLibrary
 
         public void Undo()
         {
+            if (DoList.Count == 0)
+            {
+                return;
+            }
+
             var undoAction = DoList.Pop();
             UndoEvent?.Invoke(this, undoAction);
             UndoList.Push(undoAction);
