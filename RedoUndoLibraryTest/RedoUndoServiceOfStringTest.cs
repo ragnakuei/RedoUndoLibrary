@@ -28,14 +28,14 @@ namespace RedoUndoLibraryTest
         }
 
         [Test]
-        public void Do2TimesAndUndo2Times_Then_UndoList()
+        public void Do2TimesAndUndo2Times_Then_RedoList()
         {
             var target = new RedoUndoService<string>(3);
             target.Do("A");
             target.Do("B");
             target.Undo();
             target.Undo();
-            var actual = target.UndoList;
+            var actual = target.RedoList;
 
             var expected = new Stack<string>(new[] { "B", "A" });
 
@@ -59,7 +59,7 @@ namespace RedoUndoLibraryTest
         }
 
         [Test]
-        public void Do3TimesAndUndo2Times_Then_UndoList()
+        public void Do3TimesAndUndo2Times_Then_RedoList()
         {
             var target = new RedoUndoService<string>(3);
             target.Do("A");
@@ -67,7 +67,7 @@ namespace RedoUndoLibraryTest
             target.Do("C");
             target.Undo();
             target.Undo();
-            var actual = target.UndoList;
+            var actual = target.RedoList;
 
             var expected = new Stack<string>(new[] { "C", "B" });
 
@@ -75,7 +75,7 @@ namespace RedoUndoLibraryTest
         }
 
         [Test]
-        public void Do3TimesAndUndo1TimesAndDo1Time_Then_UndoList()
+        public void Do3TimesAndUndo1TimesAndDo1Time_Then_RedoList()
         {
             var target = new RedoUndoService<string>(5);
             target.Do("A");
@@ -83,7 +83,7 @@ namespace RedoUndoLibraryTest
             target.Do("C");
             target.Undo();
             target.Do("D");
-            var actual = target.UndoList;
+            var actual = target.RedoList;
 
             var expected = new Stack<string>();
 
@@ -99,7 +99,7 @@ namespace RedoUndoLibraryTest
             target.Do("C");
             var actual = target.DoList;
 
-            var expected = new Stack<string>(new []{"B","C"});
+            var expected = new Stack<string>(new[] { "B", "C" });
 
             actual.Should().BeEquivalentTo(expected);
         }
@@ -110,20 +110,62 @@ namespace RedoUndoLibraryTest
             var target = new RedoUndoService<string>(3);
             target.Do("A");
             target.Do("B");
+            target.Do("C");
 
-            string actual = string.Empty ;
+            string actualUndoDto = string.Empty;
             EventHandler<string> handler = (sender, e) =>
                                            {
-                                               actual = e;
+                                               actualUndoDto = e;
                                            };
 
             target.UndoEvent += handler;
             target.Undo();
             target.UndoEvent -= handler;
 
-            var expected = "B";
-            Assert.AreEqual(expected, actual);
+            var expectedUndoDto = "C";
+            Assert.AreEqual(expectedUndoDto, actualUndoDto);
+
+            var actualDoList   = target.DoList;
+            var expectedDoList = new Stack<string>(new[] { "A", "B" });
+            Assert.AreEqual(expectedDoList, actualDoList);
+
+            var actualRedoList   = target.RedoList;
+            var expectedRedoList = new Stack<string>(new[] { "C" });
+            Assert.AreEqual(expectedRedoList, actualRedoList);
         }
+
+        [Test]
+        public void RedoRaiseEvent()
+        {
+            var target = new RedoUndoService<string>(3);
+            target.Do("A");
+            target.Do("B");
+            target.Do("C");
+            target.Undo();
+            target.Undo();
+
+            string actualRedoDto = string.Empty;
+            EventHandler<string> handler = (sender, e) =>
+                                           {
+                                               actualRedoDto = e;
+                                           };
+
+            target.RedoEvent += handler;
+            target.Redo();
+            target.RedoEvent -= handler;
+
+            var expectedUndoDto = "B";
+            Assert.AreEqual(expectedUndoDto, actualRedoDto);
+
+            var actualDoList   = target.DoList;
+            var expectedDoList = new Stack<string>(new[] { "A", "B" });
+            Assert.AreEqual(expectedDoList, actualDoList);
+
+            var actualRedoList   = target.RedoList;
+            var expectedRedoList = new Stack<string>(new[] { "C" });
+            Assert.AreEqual(expectedRedoList, actualRedoList);
+        }
+
 
         [Test]
         public void MaxStep2Do2TimesAndUndo3Times()
@@ -135,13 +177,13 @@ namespace RedoUndoLibraryTest
             target.Undo();
             target.Undo();
 
-            var actualDoList = target.DoList;
+            var actualDoList   = target.DoList;
             var expectedDoList = new Stack<string>();
             actualDoList.Should().BeEquivalentTo(expectedDoList);
 
-            var actualUndoList = target.UndoList;
-            var expectedUndoList = new Stack<string>(new []{"B","A"});
-            actualUndoList.Should().BeEquivalentTo(expectedUndoList);
+            var actualRedoList   = target.RedoList;
+            var expectedRedoList = new Stack<string>(new[] { "B", "A" });
+            actualRedoList.Should().BeEquivalentTo(expectedRedoList);
         }
     }
 }
