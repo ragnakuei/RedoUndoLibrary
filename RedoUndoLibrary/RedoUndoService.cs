@@ -15,9 +15,6 @@ namespace RedoUndoLibrary
 
         public Stack<T> RedoList { get; set; } = new Stack<T>();
 
-        public event EventHandler<T> UndoEvent;
-        public event EventHandler<T> RedoEvent;
-
         public void Do(T t)
         {
             DoList.Push(t);
@@ -25,29 +22,30 @@ namespace RedoUndoLibrary
             RedoList.Clear();
         }
 
-        public void Undo()
+        public T Undo()
         {
             if (DoList.Count == 0)
             {
-                return;
+                return default(T);
             }
 
             var undoAction = DoList.Pop();
-            UndoEvent?.Invoke(this, undoAction);
             RedoList.Push(undoAction);
+
+            return undoAction;
         }
 
-        public void Redo()
+        public T Redo()
         {
             if (RedoList.Count == 0)
             {
-                return;
+                return default(T);
             }
 
             var redoAction = RedoList.Pop();
-            RedoEvent?.Invoke(this, redoAction);
-
             DoList.Push(redoAction);
+
+            return redoAction;
         }
 
         private readonly int _maxStep;

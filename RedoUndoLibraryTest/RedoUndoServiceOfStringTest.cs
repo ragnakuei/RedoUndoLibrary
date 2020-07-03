@@ -112,16 +112,8 @@ namespace RedoUndoLibraryTest
             target.Do("B");
             target.Do("C");
 
-            string actualUndoDto = string.Empty;
-            EventHandler<string> handler = (sender, e) =>
-                                           {
-                                               actualUndoDto = e;
-                                           };
 
-            target.UndoEvent += handler;
-            target.Undo();
-            target.UndoEvent -= handler;
-
+            var actualUndoDto = target.Undo();
             var expectedUndoDto = "C";
             Assert.AreEqual(expectedUndoDto, actualUndoDto);
 
@@ -144,16 +136,7 @@ namespace RedoUndoLibraryTest
             target.Undo();
             target.Undo();
 
-            string actualRedoDto = string.Empty;
-            EventHandler<string> handler = (sender, e) =>
-                                           {
-                                               actualRedoDto = e;
-                                           };
-
-            target.RedoEvent += handler;
-            target.Redo();
-            target.RedoEvent -= handler;
-
+            var actualRedoDto = target.Redo();
             var expectedUndoDto = "B";
             Assert.AreEqual(expectedUndoDto, actualRedoDto);
 
